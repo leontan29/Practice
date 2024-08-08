@@ -5,7 +5,7 @@ EXEC = main
 
 all: $(EXEC)
 
-main: main.cpp
+main: main.cpp trie.cpp
 
 clean:
 	rm -f *.o $(EXEC)
