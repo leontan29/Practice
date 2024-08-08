@@ -117,13 +117,11 @@ template<typename T>
 std::string Stack<T>::to_string() const {
   std::ostringstream buf;
   buf << "[";
-  bool printspace = false;
+  const char* sep = "";
   for (int i = (int)_top - 1; i >= 0; i--) {
-    if (printspace) {
-      buf << " ";
-    }
-    printspace = true;
+    buf << sep;
     buf << _data[i];
+    sep = " ";
   }
   buf << "]";
   return buf.str();
