@@ -30,11 +30,11 @@ public:
   // Look at the top of the heap. Return false if heap is empty.
   bool peek(T& elem) const;
 
-  // Put elem into heap.
-  void put(const T &elem);
+  // Add elem into heap.
+  void push(const T &elem);
 
   // Remove the elem at top of the heap. 
-  void remove();
+  void pop();
 
   // Return a string '[x y z]' if heap contains x, y, z.  Assume T has
   // anoverloaded ostream& operator<<() function.
