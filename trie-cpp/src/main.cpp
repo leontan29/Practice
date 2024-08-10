@@ -19,6 +19,12 @@ public:
 };
 
 void Tests::test1() {
+  cout << "Test 1: insert" << endl;
+  Trie t;
+  t.insert("cat");
+  t.insert("cash");
+  t.insert("ca");
+  cout << t.to_string() << endl;
 }
 
 int main()
