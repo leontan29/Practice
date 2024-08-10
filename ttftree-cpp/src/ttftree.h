@@ -23,7 +23,23 @@ private:
 	delete R[i].ptr;
       }
     }
+
+    void split(Node*& right, K& midk, V& midv) {
+      // split [a b c] into [a] and [c], and return b in (midk, midv)
+      assert(N == 3);
+      right = new Node;
+      right->N = 1;
+      int mid = N-2;
+      midk = R[mid].key;
+      midv = R[mid].value;
+      right->ptr0 = R[mid].ptr;
+      right->R[0] = R[N-1];
+      N--;
+    }
   };
+
+
+  void descend(const K& key, Node*& parent, Node*& child);
 
   Node _root;
 
