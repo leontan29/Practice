@@ -45,8 +45,8 @@ private:
   //   If xy matched, return (_root->kid['x']->kid['y'], "z").
   //   If xyz chars matched, return (_root->kid['x']->kid['y']->kid['z'], "").
   void descend(const std::string& s,
-	       Node*& node,
-	       std::string& remain);
+	       const Node*& node,
+	       std::string& remain) const;
   
 public:
   // Insert s into the trie.
@@ -59,7 +59,7 @@ public:
   bool find(const std::string& s) const;
 
   // Return all strings in the trie with prefix s. Return at most 'limit' items.
-  std::vector<std::string> get_completions(const std::string& s, int limit) const;
+  std::vector<std::string> get_completions(const std::string& s) const;
 
   // Return a string with the content of trie in this format:
   //     [item1 item2 item3].
