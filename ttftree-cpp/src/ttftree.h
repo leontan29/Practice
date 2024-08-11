@@ -39,9 +39,9 @@ private:
   };
 
 
-  void descend(const K& key, Node*& parent, Node*& child);
-
   Node _root;
+  
+  void descend(const K& key, Node*& parent, Node*& child);
 
 public:
 
