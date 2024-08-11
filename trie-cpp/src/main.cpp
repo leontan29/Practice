@@ -1,7 +1,6 @@
 #include "trie.h"
 #include <iostream>
 
-
 using std::cout;
 using std::endl;
 
@@ -51,8 +50,7 @@ void Tests::test3() {
   CHECK(v[2] == "catastrophe");
 }
 
-int main()
-{
+int main() {
   try {
     Tests::test1();
     Tests::test2();
