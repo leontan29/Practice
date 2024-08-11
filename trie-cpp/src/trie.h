@@ -18,6 +18,19 @@ private:
 	delete p;
       }
     }
+
+    Node* get(char ch) const {
+      ch = tolower(ch);
+      return 'a' <= ch && ch <= 'z' ? kid[ch - 'a'] : nullptr;
+    }
+    void put(char ch, Node* p) {
+      ch = tolower(ch);
+      if ('a' <= ch && ch <= 'z') {
+	kid[ch - 'a'] = p;
+      } else {	
+	throw std::runtime_error("bad char");
+      }
+    }
   };
 
   // for to_string()
@@ -25,14 +38,6 @@ private:
     std::string prefix;
     const Trie::Node* subtree;
   };
-
-  static int norm(char ch) {
-    int idx = tolower(ch) - 'a';
-    if (! (0 <= idx && idx < 26)) {
-      throw std::runtime_error("bad char in string");
-    }
-    return idx;
-  }
 
   // Trie starts here
   Node _root;
