@@ -1,3 +1,12 @@
+/*
+### Exercise 5: **Creating a `Book` Class**
+- **Objective**: Create a class `Book` to represent a book with a title, author, and number of pages.
+- **Tasks**:
+  1. Define the class with private data members for `title`, `author`, and `pages`.
+  2. Add a constructor to initialize these members.
+  3. Write a member function `getDetails()` that returns a string containing the book's title, author, and the number of pages.
+  4. Write a main function to create a `Book` object and print the details of the book.
+*/
 #include <iostream>
 #include <string>
 #include <sstream>

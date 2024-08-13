@@ -1,3 +1,13 @@
+/*
+### Exercise 4: **Creating a `Circle` Class**
+- **Objective**: Create a class `Circle` that represents a circle with a radius.
+- **Tasks**:
+  1. Define the class with a private data member `radius`.
+  2. Add a constructor to initialize the radius.
+  3. Write a member function `area()` that calculates and returns the area of the circle (use `M_PI` for the value of π).
+  4. Write a member function `circumference()` that calculates and returns the circumference.
+  5. Write a main function to create a `Circle` object and print its area and circumference.
+*/
 #include <iostream>
 #include <cmath>
 
