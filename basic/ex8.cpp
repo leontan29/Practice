@@ -1,5 +1,4 @@
 /*
-
 ## Exercise 8: Pointer to a Class Method
 
 **Objective:** Call a class method using a pointer to the object.
@@ -22,5 +21,35 @@
 ```
 Area: 50
 ```
-
 */
+#include <iostream>
+
+class Rectangle {
+private:
+  int width;
+  int height;
+
+public:
+  Rectangle() : width(0), height(0) {}
+  
+  void setDimensions(int w, int h) {
+    width = w;
+    height = h;
+  }
+
+  int getArea() {
+    return width * height;
+  }
+};
+
+int main() {
+  Rectangle* r;
+  r = new Rectangle;
+  // Node* r = new Rectangle();
+  r->setDimensions(4, 2);
+
+  std::cout << r->getArea() << std::endl;
+  
+  delete r;
+  return 0;
+}

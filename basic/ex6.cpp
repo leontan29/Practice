@@ -23,3 +23,43 @@ Brand: Toyota
 Year: 2020
 ```
 */
+#include <iostream>
+#include <string>
+#include <sstream>
+
+class Car {
+private:
+  std::string brand;
+  int year;
+
+public:
+  Car() : year(0) {}
+
+  void setBrand(std::string b){
+    brand = b;
+  }
+  
+  void setYear(int y) {
+    year = y;
+  }
+
+  void printDetails() {
+    std::cout << "Brand: " << brand << std::endl;
+    std::cout << "Year: " << year << std::endl;
+  }
+};
+
+int main() {
+  Car* p;
+  p = new Car;
+  p->setBrand("Honda");
+  p->setYear(2006);
+  p->printDetails();
+  delete p;
+  return 0;
+}
+
+
+
+
+
