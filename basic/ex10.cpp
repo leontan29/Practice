@@ -32,12 +32,12 @@ private:
   int age;
 
 public:
-  Person() {
-    // allocate memory for name
-    name = new std::string("");
+  Person() : name(new std::string("")), age(0) {
+    std::cout << "constructing Person\n";
   }
 
   ~Person() {
+    std::cout << "destruct Person " << *name << std::endl;
     // free allocated memory
     delete name;
   }
@@ -60,10 +60,33 @@ public:
    - Set and print the person’s details.
    - The destructor should automatically deallocate memory when the object goes out of scope.
  */
+using std::cout;
+
 
 int main() {
   Person* p = new Person;
   p->setDetails("Emma", 20);
   p->printDetails();
+  delete p;
+
+
+  cout << "making one\n";
+  {
+    Person one;
+    one.setDetails("one", 1);
+  }
+
+  cout << "making two\n";
+  {
+    Person two;
+    two.setDetails("two", 2);
+  }
+  
+  cout << "making three\n";
+  {
+    Person* three = new Person;
+    three->setDetails("three", 3);
+    delete three;
+  }
   return 0;
 }
