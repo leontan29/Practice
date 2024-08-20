@@ -205,6 +205,8 @@ private:
 
 public:
   Library() : head(nullptr) {}
+  Library(Library&) = delete;  // disallow
+  void operator=(Library&) = delete; // disallow
 
   ~Library() {
     // for each item in node, check the next and book pointers and delete
@@ -385,5 +387,6 @@ int main() {
              "(30, Author 30, Book 30)\n";
 
   CHECK(expected == L.to_string());
+
   return 0;
 }
