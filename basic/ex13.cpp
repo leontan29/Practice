@@ -159,6 +159,12 @@ public:
   void printDetails() {
     std::cout << "ID: " << id << ", Title: " << title << ", Author: " << author << std::endl;
   }
+
+  std::string to_string() {
+    // TODO: return a representation of Book like this '(id, author, title)'
+    throw std::runtime_exception("not  implemented");
+  }
+
 };
 
 class Library {
@@ -259,6 +265,12 @@ public:
     for (curr = head; curr; curr = curr->next) {
       curr->book->printDetails();
     }
+  }
+
+  std::string to_string() {
+    // Return a string with all books in the library, one per line
+    // TODO:
+    throw std::runtime_exception("not  implemented");
   }
 };
 
