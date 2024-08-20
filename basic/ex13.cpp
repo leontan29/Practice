@@ -263,16 +263,32 @@ public:
 };
 
 int main() {
-  Library library;
+  Library L;
 
-  library.addBook("The Catcher in the Rye", "J.D Salinger", 1);
-  library.addBook("To Kill a Mockingbird", "Harper Lee", 3);
-  library.addBook("1984", "George Orwell", 2);
-  library.addBook("One Piece", "Oda", 100);
+  for (int id = 10; id <= 30; id += 10) {
+    std::string num = std::to_string(id);
+    L.addBook("Book " + num, "Author " + num, id);
+  }
+
+  // Add in the middle
+  L.addBook("Book 25", "Author 25", 25);
+
+  // Add in front
+  L.addBook("Book 5", "Author 5", 5);
+
+  // Add at back
+  L.addBook("Book 35", "Author 35", 35);
+
+  // Remove in the middle
+  L.removeBook(25);
+
+  // Remove at the front
+  L.removeBook(5);
+
+  // Remove at the end
+  L.removeBook(35);
 
   std::cout << "All Books in the Library: " << std::endl;
   library.printAllBooks();
-
-  
 }
 
