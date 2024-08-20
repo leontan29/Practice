@@ -2,9 +2,9 @@
 # Advanced Exercise: Implementing a Dynamic Library System
 
 **Objective:** Create a dynamic library management system using
-**classes and pointers. This exercise will help you integrate several
-**key concepts, including dynamic memory allocation, object-oriented
-**design, and pointer manipulation.
+classes and pointers. This exercise will help you integrate several
+key concepts, including dynamic memory allocation, object-oriented
+design, and pointer manipulation.
 
 ---
 
@@ -131,3 +131,111 @@ allocation, pointer manipulation, and class design, all of which are
 crucial concepts in C++.
 */
 
+#include <iostream>
+#include <string>
+
+class Book {
+private:
+  std::string title;
+  std::string author;
+  int id;
+  
+public:
+  Book(std::string t, std::string a, int i) : title(t), author(a), id(i) {} 
+
+  std::string getTitle() {
+    return title;
+  }
+
+  std::string getAuthor() {
+    return author;
+  }
+
+  int getId() {
+    return id;
+  }
+
+  void printDetails() {
+    std::cout << "ID : " << id << " Title: " << title << ", Author: " << author << std::endl;
+  }
+};
+
+class Library {
+private:
+  Book** books;
+  int bookCount;
+
+public:
+  Library() : books(nullptr), bookCount(0) {}
+
+  ~Library() {
+    for (int i = 0; i < bookCount; i++){
+      delete books[i];
+    }
+    delete []books;
+  }
+
+  void addBook(std::string title, std::string author, int id) {
+    Book* b = new Book(title, author, id);
+    Book** list = new Book*[bookCount+1];
+    for (int i = 0; i < bookCount; i++) {
+      list[i] = books[i];
+    }
+    list[bookCount] = b;
+    delete []books;
+    books = list;
+    bookCount++;
+  }
+
+  void removeBook(int id) {
+    for (int i = 0; i < bookCount; i++) {
+      Book* b = books[i];
+      if (b && b->getId() == id) {
+	delete b;
+	books[i] = nullptr;
+      }
+    }
+  }
+
+  Book* searchBook(int id) {
+    // for each book check their id and see if it matches
+    for (int i = 0; i < bookCount; i++) {
+      Book* b = books[i];
+      if (b && b->getId() == id) {
+	return b;
+      }
+    }
+    return nullptr;
+  }
+
+  void printAllBooks() {
+    for (int i = 0; i < bookCount; i++) {
+      Book* b = books[i];
+      if (b) {
+	b->printDetails();
+      }
+    }
+  }
+};
+
+
+int main() {
+  Library library;
+
+  library.addBook("The Catcher in the Rye", "J.D Salinger", 1);
+  library.addBook("To Kill a Mockingbird", "Harper Lee", 2);
+  library.addBook("1984", "George Orwell", 3);
+
+  std::cout << "All Books in the Library: " << std::endl;
+  library.printAllBooks();
+
+  std::cout << "Searching for Book with ID 2: " << std::endl;
+  Book* book = library.searchBook(2);
+  if (book) {
+      book->printDetails();
+  } else {
+    std::cout << "Book not found!";
+  }
+  
+  return 0;
+}
