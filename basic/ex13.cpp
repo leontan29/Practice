@@ -242,21 +242,37 @@ public:
 	break;
       }
     }
-    // if (!curr): return, not found
+    // case  prev     curr        what
+    // ------------------------------------------
+    //  1    null     null      NOP
+    //  2    null      z        Change head to curr->next, delete curr
+    //  3     x       null      NOP 
+    //  4     x        z        prev->next = curr->next, delete curr
+    
+
+    // case 1 and 3: 
     if (!curr) {
       return;
+    } 
+    // case 2:
+    if (!prev && curr) {
+      head = curr->next;
+      delete curr;
+      return;
     }
-
-    // now, curr is the node i want to delete
     
-    
-    // if (!prev): delete the head
-    
-    // if (prev && curr): delete book from curr
+    // case 4:
+    prev->next = curr->next;
+    delete curr;
   }
  
   Book* searchBook(int id) {
-   
+    for (auto curr = head; curr; curr = curr->next) {
+      if (id == curr->book->getId()) {
+	return curr->book;
+      }
+    }
+    return nullptr;
   }
   
   void printAllBooks() {
@@ -302,5 +318,21 @@ int main() {
 
   std::cout << "All Books in the Library: " << std::endl;
   library.printAllBooks();
+  
+  library.removeBook(100);
+  library.removeBook(1);
+
+  std::cout << "Books in Library after remove: " << std::endl;
+  library.printAllBooks();
+
+  std::cout << "Searching for Book with ID 2: " << std::endl;
+  Book* book = library.searchBook(2);
+  if (book) {
+    book->printDetails();
+  } else {
+    std::cout << "Book not found!";
+  }
+  
+  return 0;
 }
 
