@@ -28,20 +28,25 @@ dynamically manage its collection of books.
        - `int id`
      - Public methods:
        - Constructor to initialize the book with a title, author, and ID.
-       - Getters for each private member (`getTitle()`, `getAuthor()`, `getId()`).
+       - Getters for each private member (`getTitle()`, `getAuthor()`,
+`getId()`).
        - A method to print book details (`void printDetails()`).
 
    - **Library Class:**
      - Private members:
-       - `Book** books` (a pointer to a dynamic array of pointers to `Book` objects).
+       - `Book** books` (a pointer to a dynamic array of pointers to `Book`
+objects).
        - `int bookCount` (the number of books currently in the library).
      - Public methods:
        - Constructor to initialize the `books` array and set `bookCount` to 0.
        - Destructor to free dynamically allocated memory.
-       - `void addBook(std::string title, std::string author, int id)` to add a new book.
+       - `void addBook(std::string title, std::string author, int id)` to add a
+new book.
        - `void removeBook(int id)` to remove a book by its ID.
-       - `Book* searchBook(int id)` to search for a book by its ID and return a pointer to it.
-       - `void printAllBooks()` to print details of all the books in the library.
+       - `Book* searchBook(int id)` to search for a book by its ID and return a
+pointer to it.
+       - `void printAllBooks()` to print details of all the books in the
+library.
 
 2. **Main Program:**
    - Create a `Library` object.
@@ -53,9 +58,12 @@ dynamically manage its collection of books.
 
 ### Hints:
 
-- **Dynamic Memory Allocation:** Use `new` to allocate memory for each new `Book` and for the array of pointers in the `Library` class.
-- **Pointer Management:** Ensure you handle pointers carefully, especially when adding or removing books.
-- **Memory Cleanup:** The destructor in the `Library` class should ensure that all dynamically allocated memory is properly freed.
+- **Dynamic Memory Allocation:** Use `new` to allocate memory for each new
+`Book` and for the array of pointers in the `Library` class.
+- **Pointer Management:** Ensure you handle pointers carefully, especially when
+adding or removing books.
+- **Memory Cleanup:** The destructor in the `Library` class should ensure that
+all dynamically allocated memory is properly freed.
 
 ### Sample Usage
 
@@ -69,15 +77,15 @@ class Library { ... }
 
 int main() {
     Library library;
-    
+
     library.addBook("The Catcher in the Rye", "J.D. Salinger", 1);
     library.addBook("To Kill a Mockingbird", "Harper Lee", 2);
     library.addBook("1984", "George Orwell", 3);
-    
+
     std::cout << "All Books in the Library:
 ";
     library.printAllBooks();
-    
+
     std::cout << "
 Searching for Book with ID 2:
 ";
@@ -88,17 +96,17 @@ Searching for Book with ID 2:
         std::cout << "Book not found!
 ";
     }
-    
+
     std::cout << "
 Removing Book with ID 2.
 ";
     library.removeBook(2);
-    
+
     std::cout << "
 All Books in the Library after Removal:
 ";
     library.printAllBooks();
-    
+
     return 0;
 }
 ```
@@ -132,11 +140,12 @@ crucial concepts in C++.
 */
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
+#include <exception>
 
-using std::cout; 
+using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
@@ -158,64 +167,63 @@ private:
 public:
   Book(std::string t, std::string a, int i) : title(t), author(a), id(i) {}
 
-  std::string getTitle() {
-    return title;
-  }
+  std::string getTitle() { return title; }
 
-  std::string getAuthor() {
-    return author;
-  }
+  std::string getAuthor() { return author; }
 
-  int getId() {
-    return id;
-  }
-
-  void printDetails() {
-    std::cout << "ID: " << id << ", Title: " << title << ", Author: " << author << std::endl;
-  }
+  int getId() { return id; }
 
   std::string to_string() {
-    // TODO: return a representation of Book like this '(id, author, title)'
-
+    // Return a representation of Book like this '(id, author, title)'
     return "(" + std::to_string(id) + ", " + author + ", " + title + ")";
   }
-
 };
 
 class Library {
 private:
   struct Node {
-    Book* book;
-    Node* next;
-    Node() : book(nullptr), next(nullptr) {}
+    Book *book;
+    Node *next;
+    Node(string title, string author, int id)
+      : book(new Book(title, author, id)), next(nullptr) {}
+    ~Node() { delete book; }
   };
 
-  Node* head;
+  Node *head;
+
+  // Look for id in list. Return prev/curr node where
+  // id <= curr->id.
+  void scan(int id, Node*& prev, Node*& curr) {
+    prev = nullptr;
+    curr = head;
+    for ( ; curr; prev = curr, curr = curr->next) {
+      if (id <= curr->book->getId()) {
+	break;
+      }
+    }
+  }
 
 public:
-  Library() : head(nullptr) {} 
+  Library() : head(nullptr) {}
 
   ~Library() {
-    // for each item in node, check the next and book pointers and delete iteratively
-    Node* curr;
-    Node* tmp;
-    for (curr = head; curr; curr = tmp) {
-      delete curr->book;
+    // for each item in node, check the next and book pointers and delete
+    // iteratively
+    Node *tmp;
+    for (auto curr = head; curr; curr = tmp) {
       tmp = curr->next;
       delete curr;
     }
   }
-  
+
   void addBook(std::string title, std::string author, int id) {
-    Node* n = new Node();
-    n->book = new Book(title, author, id);
-    Node* curr;
-    Node* prev = nullptr;
-    // Find position in list to insert new book. 
-    for (curr = head; curr; prev = curr, curr = curr->next) {
-      if (id < curr->book->getId()) {
-	break;
-      }
+    Node *n = new Node(title, author, id);
+    Node *curr;
+    Node *prev;
+
+    scan(id, prev, curr);
+    if (curr && id == curr->book->getId()) {
+      throw std::runtime_error("id already exists");
     }
 
     // now, need to insert newbook between prev and curr.
@@ -224,8 +232,9 @@ public:
     // ------------------------------------------
     //  1    null     null      insert at head: H = n; n->next = curr.
     //  2    null      z        insert at head: H = n; n->next = curr.
-    //  3     x       null      insert at tail: prev->next = n; n->next = nullptr.
-    //  4     x        z        insert bet prev&curr: prev->next = n; n->next = curr.
+    //  3     x       null      insert at tail: prev->next = n; n->next =
+    //  nullptr. 4     x        z        insert bet prev&curr: prev->next = n;
+    //  n->next = curr.
 
     // case 1 and 2:
     if (!prev) {
@@ -247,55 +256,46 @@ public:
     // set new node->next to curr
     n->next = curr;
   }
-  
+
   void removeBook(int id) {
-    Node* curr;
-    Node* prev = nullptr;
-    // find position in list to delete
-    for (curr = head; curr; prev = curr, curr = curr->next) {
-      if (id == curr->book->getId()) {
-	break;
-      }
+    Node *curr;
+    Node *prev;
+
+    scan(id, prev, curr);
+    if (curr && id != curr->book->getId()) {
+      return;  // id not found
     }
+
     // case  prev     curr        what
     // ------------------------------------------
     //  1    null     null      NOP
     //  2    null      z        Change head to curr->next, delete curr
-    //  3     x       null      NOP 
+    //  3     x       null      NOP
     //  4     x        z        prev->next = curr->next, delete curr
-    
 
-    // case 1 and 3: 
+    // case 1 and 3:
     if (!curr) {
       return;
-    } 
+    }
     // case 2:
     if (!prev && curr) {
       head = curr->next;
       delete curr;
       return;
     }
-    
+
     // case 4:
     prev->next = curr->next;
     delete curr;
   }
- 
-  Book* searchBook(int id) {
+
+  Book *searchBook(int id) {
     for (auto curr = head; curr; curr = curr->next) {
       if (id == curr->book->getId()) {
-	return curr->book;
+        return curr->book;
       }
     }
     return nullptr;
-  }
-  
-  void printAllBooks() {
-    // from head, chase the pointer and print the book
-    Node* curr;  
-    for (curr = head; curr; curr = curr->next) {
-      curr->book->printDetails();
-    }
   }
 
   std::string to_string() {
@@ -318,19 +318,18 @@ int main() {
   }
 
   std::string expected = "(10, Author 10, Book 10)\n"
-    "(20, Author 20, Book 20)\n"
-    "(30, Author 30, Book 30)\n";
+                         "(20, Author 20, Book 20)\n"
+                         "(30, Author 30, Book 30)\n";
 
   CHECK(expected == L.to_string());
 
-  
   // Add in the middle 25
   L.addBook("Book 25", "Author 25", 25);
 
   expected = "(10, Author 10, Book 10)\n"
-    "(20, Author 20, Book 20)\n"
-    "(25, Author 25, Book 25)\n"
-    "(30, Author 30, Book 30)\n";
+             "(20, Author 20, Book 20)\n"
+             "(25, Author 25, Book 25)\n"
+             "(30, Author 30, Book 30)\n";
 
   CHECK(expected == L.to_string());
 
@@ -338,54 +337,53 @@ int main() {
   L.addBook("Book 5", "Author 5", 5);
 
   expected = "(5, Author 5, Book 5)\n"
-    "(10, Author 10, Book 10)\n"
-    "(20, Author 20, Book 20)\n"
-    "(25, Author 25, Book 25)\n"
-    "(30, Author 30, Book 30)\n";
+             "(10, Author 10, Book 10)\n"
+             "(20, Author 20, Book 20)\n"
+             "(25, Author 25, Book 25)\n"
+             "(30, Author 30, Book 30)\n";
 
   CHECK(expected == L.to_string());
 
   // Add at back 35
   L.addBook("Book 35", "Author 35", 35);
-  
+
   expected = "(5, Author 5, Book 5)\n"
-    "(10, Author 10, Book 10)\n"
-    "(20, Author 20, Book 20)\n"
-    "(25, Author 25, Book 25)\n"
-    "(30, Author 30, Book 30)\n"
-    "(35, Author 35, Book 35)\n";
+             "(10, Author 10, Book 10)\n"
+             "(20, Author 20, Book 20)\n"
+             "(25, Author 25, Book 25)\n"
+             "(30, Author 30, Book 30)\n"
+             "(35, Author 35, Book 35)\n";
 
   CHECK(expected == L.to_string());
 
   // Remove in the middle
   L.removeBook(25);
-  
+
   expected = "(5, Author 5, Book 5)\n"
-    "(10, Author 10, Book 10)\n"
-    "(20, Author 20, Book 20)\n"
-    "(30, Author 30, Book 30)\n"
-    "(35, Author 35, Book 35)\n";
-  
+             "(10, Author 10, Book 10)\n"
+             "(20, Author 20, Book 20)\n"
+             "(30, Author 30, Book 30)\n"
+             "(35, Author 35, Book 35)\n";
+
   CHECK(expected == L.to_string());
-  
+
   // Remove at the front
   L.removeBook(5);
-  
+
   expected = "(10, Author 10, Book 10)\n"
-    "(20, Author 20, Book 20)\n"
-    "(30, Author 30, Book 30)\n"
-    "(35, Author 35, Book 35)\n";
-  
+             "(20, Author 20, Book 20)\n"
+             "(30, Author 30, Book 30)\n"
+             "(35, Author 35, Book 35)\n";
+
   CHECK(expected == L.to_string());
-  
+
   // Remove at the end
   L.removeBook(35);
 
   expected = "(10, Author 10, Book 10)\n"
-    "(20, Author 20, Book 20)\n"
-    "(30, Author 30, Book 30)\n";
-  
+             "(20, Author 20, Book 20)\n"
+             "(30, Author 30, Book 30)\n";
+
   CHECK(expected == L.to_string());
   return 0;
 }
-
