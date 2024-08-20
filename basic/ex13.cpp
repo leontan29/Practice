@@ -134,6 +134,20 @@ crucial concepts in C++.
 #include <iostream>
 #include <string>
 #include <vector>
+#include <sstream>
+
+using std::cout; 
+using std::endl;
+using std::string;
+using std::vector;
+
+static inline void check(bool flag, const char *file, int line) {
+  if (!flag) {
+    throw std::string("ERROR: failed on ") + file + " " + std::to_string(line);
+  }
+}
+
+#define CHECK(x) check(x, __FILE__, __LINE__)
 
 class Book {
 private:
@@ -162,7 +176,8 @@ public:
 
   std::string to_string() {
     // TODO: return a representation of Book like this '(id, author, title)'
-    throw std::runtime_exception("not  implemented");
+
+    return "(" + std::to_string(id) + ", " + author + ", " + title + ")";
   }
 
 };
@@ -285,54 +300,92 @@ public:
 
   std::string to_string() {
     // Return a string with all books in the library, one per line
-    // TODO:
-    throw std::runtime_exception("not  implemented");
+    std::ostringstream buf;
+    for (auto curr = head; curr; curr = curr->next) {
+      buf << curr->book->to_string() << std::endl;
+    }
+    return buf.str();
   }
 };
 
 int main() {
   Library L;
 
+  // Start with [10, 20, 30]
   for (int id = 10; id <= 30; id += 10) {
     std::string num = std::to_string(id);
     L.addBook("Book " + num, "Author " + num, id);
   }
 
-  // Add in the middle
+  std::string expected = "(10, Author 10, Book 10)\n"
+    "(20, Author 20, Book 20)\n"
+    "(30, Author 30, Book 30)\n";
+
+  CHECK(expected == L.to_string());
+
+  
+  // Add in the middle 25
   L.addBook("Book 25", "Author 25", 25);
 
-  // Add in front
+  expected = "(10, Author 10, Book 10)\n"
+    "(20, Author 20, Book 20)\n"
+    "(25, Author 25, Book 25)\n"
+    "(30, Author 30, Book 30)\n";
+
+  CHECK(expected == L.to_string());
+
+  // Add in front 5
   L.addBook("Book 5", "Author 5", 5);
 
-  // Add at back
+  expected = "(5, Author 5, Book 5)\n"
+    "(10, Author 10, Book 10)\n"
+    "(20, Author 20, Book 20)\n"
+    "(25, Author 25, Book 25)\n"
+    "(30, Author 30, Book 30)\n";
+
+  CHECK(expected == L.to_string());
+
+  // Add at back 35
   L.addBook("Book 35", "Author 35", 35);
+  
+  expected = "(5, Author 5, Book 5)\n"
+    "(10, Author 10, Book 10)\n"
+    "(20, Author 20, Book 20)\n"
+    "(25, Author 25, Book 25)\n"
+    "(30, Author 30, Book 30)\n"
+    "(35, Author 35, Book 35)\n";
+
+  CHECK(expected == L.to_string());
 
   // Remove in the middle
   L.removeBook(25);
-
+  
+  expected = "(5, Author 5, Book 5)\n"
+    "(10, Author 10, Book 10)\n"
+    "(20, Author 20, Book 20)\n"
+    "(30, Author 30, Book 30)\n"
+    "(35, Author 35, Book 35)\n";
+  
+  CHECK(expected == L.to_string());
+  
   // Remove at the front
   L.removeBook(5);
-
+  
+  expected = "(10, Author 10, Book 10)\n"
+    "(20, Author 20, Book 20)\n"
+    "(30, Author 30, Book 30)\n"
+    "(35, Author 35, Book 35)\n";
+  
+  CHECK(expected == L.to_string());
+  
   // Remove at the end
   L.removeBook(35);
 
-  std::cout << "All Books in the Library: " << std::endl;
-  library.printAllBooks();
+  expected = "(10, Author 10, Book 10)\n"
+    "(20, Author 20, Book 20)\n"
+    "(30, Author 30, Book 30)\n";
   
-  library.removeBook(100);
-  library.removeBook(1);
-
-  std::cout << "Books in Library after remove: " << std::endl;
-  library.printAllBooks();
-
-  std::cout << "Searching for Book with ID 2: " << std::endl;
-  Book* book = library.searchBook(2);
-  if (book) {
-    book->printDetails();
-  } else {
-    std::cout << "Book not found!";
-  }
-  
+  CHECK(expected == L.to_string());
   return 0;
 }
 
