@@ -42,19 +42,21 @@ private:
 
     // Insert KV at idx. ptr is to right of the new KV.
     // There must be space to accomodate new KV.
-    void insert(int idx, const K& key, const V& value, Node* ptr) {
+    void insert(int idx, const K& key, const V& value, Node* rptr) {
       assert(N < 3);
       assert(0 <= idx && idx <= N);
       // shift right to make space
+      Node* lptr = (idx == N) ? ptrx : tup[idx+1].ptr;
       for (int i = N; i > idx; i--) {
 	tup[i] = tup[i-1];
       }
+      tup[idx].ptr = lptr;
       tup[idx].key  = key;
       tup[idx].value = value;
-      if (idx == 2)
-	ptrx = ptr;
+      if (idx == N)
+	ptrx = rptr;
       else 
-	tup[idx+1].ptr = ptr;
+	tup[idx+1].ptr = rptr;
       N++;
     }
 
@@ -108,7 +110,6 @@ private:
     path.reserve(5);
     
     Node* node = _root;
-    int idx = 0;
     while (node) {
       path.push_back(node);
       int i = node->lookup(key);
@@ -168,13 +169,11 @@ private:
 public:
 
   void put(const K& key, const V& value) {
-#ifndef NDEBUG
     check();
-#endif    
   again:
     auto path = descend(key);
-    int sz = path.size();
-    Node* n = path[sz-1];
+    int pathsz = path.size();
+    Node* n = path[pathsz-1];
     int i = n->lookup(key);
     if (i < n->N && key == n->tup[i].key) {
       n->tup[i].value = value;
@@ -183,7 +182,7 @@ public:
     if (n->is_full()) {
       // find first parent that is not full
       int j;
-      for (j = i - 1; j >= 0 && path[j]->is_full(); j--);
+      for (j = pathsz - 1; j >= 0 && path[j]->is_full(); j--);
       if (j == -1) {
 	// all parents are full => grow the tree by one level
 	Node* newroot = new Node();
@@ -192,13 +191,15 @@ public:
 	path.insert(path.begin(), _root);
 	j = 0;
       } 
-      // split the kid of parent in path
+      // split the kid at path[j]
+      path[j]->split_kid(path[j]->N);
+      check();
 
       // re-descend
       goto again;
     }
     // insert into n
-    assert(n->xptr == nullptr); // must be a leaf
+    assert(n->ptrx == nullptr); // must be a leaf
     n->insert(i, key, value, nullptr);
   }
 
@@ -207,9 +208,11 @@ public:
   void del(const K& key);
 
   void check() {
+#ifndef NDEBUG
     int expected_depth = -1;
     K minkey, maxkey;
     _check(_root, 0, expected_depth, minkey, maxkey);
+#endif
   }
   
 

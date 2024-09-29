@@ -26,7 +26,19 @@ void Tests::test1() {
   cout << "Test 1: Constructor" << endl;
   TTFTree<int, int> t;
   t.check();
-  
+  /*
+             [20,     40]
+         /         |        \
+      [10]        [30]        [50, 60]
+     /   \       /   \       /   |   \
+   [5]  [15]   [25]  [35]  [45] [55] [65]
+
+
+   */
+  for (int i = 5; i <= 65; i+= 5) {
+    t.put(i, i+1);
+  }
+  t.check();
 }
 
 void Tests::test2() {}
