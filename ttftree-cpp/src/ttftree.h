@@ -5,6 +5,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <queue>
+#include <ostream>
+#include <iomanip>
 
 template <typename K, typename V> class TTFTree {
 private:
@@ -38,6 +41,33 @@ private:
       }
     }
 
+    static void pptr(std::ostringstream& oss, const void* ptr) {
+      if (ptr) {
+	auto orig_flags = oss.flags();
+	oss << "&" << std::hex << std::setw(4) << std::setfill('0') << ((intptr_t)ptr & 0xFFFF);
+	oss.flags(orig_flags);
+      } else {
+	oss << "-";
+      }
+    }
+
+    std::string to_string() const {
+      std::ostringstream oss;
+      oss << "(";
+      pptr(oss, this);
+      oss << ")[";
+      
+      for (int i = 0; i < N; i++) {
+	oss << (i ? " " : "");
+	pptr(oss, tup[i].ptr);
+	oss << " " << tup[i].key;
+      }
+      oss << (N ? " " : "");
+      pptr(oss, ptrx);
+      oss << "]";
+      return oss.str();
+    }
+
     // Insert KV at idx. ptr is to right of the new KV.
     // There must be space to accomodate new KV.
     void insert(int idx, Node *LL, const K &key, const V &value, Node *RR) {
@@ -57,33 +87,45 @@ private:
       N++;
     }
 
-    // As the parent node, split the child node at idx
+    // As the parent node, split the child node.
     /*
-                      . D . H .                . D . F . H .
-      split at 1:    /    |    \     ==>      /   /    \    \
-                    A    EFG    J            C    E     G    J
+      split EFG
+      
+                          . D . H .                . D . F . H .
+      not left_heavy:    /    |    \     ==>      /   /    \    \
+                        A    EFG    J            C    E     G    J
+
+                          . D . H .                . D . G . H .
+      left_heavy:        /    |    \     ==>      /   /    \    \
+                        A    EFG    J            C    EF    -    J
+
     */
-    void split_kid(int idx) {
+    void split_kid(Node* kid, bool left_heavy=false) {
       assert(N < 3); // must accomodate new KV from split
-      assert(0 <= idx && idx <= N);
 
-      Node *LL = (idx < N ? tup[idx].ptr : ptrx);
-      Node *RR = new Node;
+      Node* LL = kid;
+      Node* RR = new Node;
+      assert(LL->N == 3);    // LL must be full!
+      int LLN = 1, RRN = 1;  // final #tup of LL/RR
+      if (left_heavy) {
+	LLN++, RRN--;
+      }
 
-      // LL must be full!
-      assert(LL->N == 3);
       // move last KV from LL to RR
-      RR->N = 1;
-      RR->tup[0] = LL->tup[2];
+      RR->N = RRN;
+      if (RRN) {
+	RR->tup[0] = LL->tup[2];
+      }
       RR->ptrx = LL->ptrx;
 
-      // move LL's #1 KV to parent (me); also insert ptr to RR to the right
-      // of the KV.
-      insert(idx, LL, LL->tup[1].key, LL->tup[1].value, RR);
+      // move LL's KV[1 or 2] to parent (me).
+      int idx = lookup(LL->tup[LLN].key);
+      insert(idx, LL, LL->tup[LLN].key, LL->tup[LLN].value, RR);
+      _check();
 
-      // LL now has only 1 tup since we moved 1 tup to RR and 1 tup to parent.
-      LL->ptrx = LL->tup[1].ptr;
-      LL->N = 1;
+      // Fix LL
+      LL->ptrx = LL->tup[LLN].ptr;
+      LL->N = LLN;
     }
 
     int lookup(const K &key) {
@@ -162,6 +204,45 @@ private:
     maxkey = node->tup[node->N - 1].key;
   }
 
+
+  bool last_on_level(Node* const n) const {
+    Node* p = _root;
+    while (p) {
+      if (n == p) {
+	return true;
+      }
+      p = p->ptrx;
+    }
+    return false;
+  }
+
+  std::vector<Node*> breadth_first_list() const {
+    std::vector<Node*> ret;
+    std::queue<Node*> q;
+    if (_root) {
+      q.push(_root);
+    }
+    while (!q.empty()) {
+      Node* n = q.front();
+      q.pop();
+
+      // add to ret[]
+      ret.push_back(n);
+      if (last_on_level(n)) {
+	ret.push_back(nullptr);
+      }
+
+      // add kids to queue
+      if (n->ptrx) {
+	for (int i = 0; i < n->N; i++) {
+	  q.push(n->tup[i].ptr);
+	}
+	q.push(n->ptrx);
+      }
+    }
+    return ret;
+  }
+
 public:
   void put(const K &key, const V &value) {
     check();
@@ -188,7 +269,7 @@ public:
         j = 0;
       }
       // split the kid at path[j]
-      path[j]->split_kid(path[j]->N);
+      path[j]->split_kid(path[j+1]);
       check();
 
       // re-descend
@@ -208,6 +289,22 @@ public:
     K minkey, maxkey;
     _check(_root, 0, expected_depth, minkey, maxkey);
 #endif
+  }
+
+
+  std::string to_string() const {
+    std::ostringstream oss;
+    // Get a breadth-first list of nodes. Each level is separated by a NULL node.
+    auto list = breadth_first_list();
+    for (auto n : list) {
+      if (!n) {
+	oss << "\n";
+	continue;
+      }
+      oss << n->to_string() << " ";
+    }
+    oss << "\n";
+    return oss.str();
   }
 
   // Don't remove this line

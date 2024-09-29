@@ -25,6 +25,7 @@ void Tests::test1() {
   cout << "Test 1: Constructor" << endl;
   TTFTree<int, int> t;
   t.check();
+  cout << t.to_string() << endl;
   /*
              [20,     40]
          /         |        \
@@ -34,10 +35,19 @@ void Tests::test1() {
 
 
    */
-  for (int i = 5; i <= 65; i += 5) {
-    t.put(i, i + 1);
+  printf("inserting 5 10 15 20\n");
+  for (int i = 5; i <= 20; i += 5) {
+    t.put(i, -i);
   }
   t.check();
+  cout << t.to_string() << endl;
+
+  printf("inserting 25 30 35 40 45 50 55 60 65\n");
+  for (int i = 25; i <= 65; i += 5) {
+    t.put(i, -i);
+  }
+  t.check();
+  cout << t.to_string() << endl;
 }
 
 void Tests::test2() {}
