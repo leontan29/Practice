@@ -84,7 +84,6 @@ void Tests::test3() {
   cout << "... insert [0..49]\n";
   for (int i = 0; i <= 49; i++) {
     t.put(i, -i);
-    cout << t.to_string() << endl;
   }
   t.check();
 
