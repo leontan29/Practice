@@ -2,12 +2,12 @@
 #include <cstdlib>
 #include <cstring>
 #include <exception>
+#include <iomanip>
+#include <ostream>
+#include <queue>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <queue>
-#include <ostream>
-#include <iomanip>
 
 template <typename K, typename V> class TTFTree {
 private:
@@ -27,7 +27,7 @@ private:
       delete ptrx;
     }
 
-    void _check(const K* minkey, const K* maxkey) {
+    void _check(const K *minkey, const K *maxkey) {
       // keys are in order in this node
       assert(0 <= N && N <= 3);
       for (int i = 1; i < N; i++) {
@@ -41,20 +41,21 @@ private:
       }
 
       if (minkey && N) {
-	assert(*minkey < tup[0].key);
+        assert(*minkey < tup[0].key);
       }
       if (maxkey && N) {
-	assert(tup[N-1].key < *maxkey);
+        assert(tup[N - 1].key < *maxkey);
       }
     }
 
-    static void pptr(std::ostringstream& oss, const void* ptr) {
+    static void pptr(std::ostringstream &oss, const void *ptr) {
       if (ptr) {
-	auto orig_flags = oss.flags();
-	oss << "&" << std::hex << std::setw(4) << std::setfill('0') << ((intptr_t)ptr & 0xFFFF);
-	oss.flags(orig_flags);
+        auto orig_flags = oss.flags();
+        oss << "&" << std::hex << std::setw(4) << std::setfill('0')
+            << ((intptr_t)ptr & 0xFFFF);
+        oss.flags(orig_flags);
       } else {
-	oss << "-";
+        oss << "-";
       }
     }
 
@@ -63,11 +64,11 @@ private:
       oss << "(";
       pptr(oss, this);
       oss << ")[";
-      
+
       for (int i = 0; i < N; i++) {
-	oss << (i ? " " : "");
-	pptr(oss, tup[i].ptr);
-	oss << " " << tup[i].key;
+        oss << (i ? " " : "");
+        pptr(oss, tup[i].ptr);
+        oss << " " << tup[i].key;
       }
       oss << (N ? " " : "");
       pptr(oss, ptrx);
@@ -97,7 +98,7 @@ private:
     // As the parent node, split the child node.
     /*
       split EFG
-      
+
                           . D . H .                . D . F . H .
       not left_heavy:    /    |    \     ==>      /   /    \    \
                         A    EFG    J            C    E     G    J
@@ -107,21 +108,21 @@ private:
                         A    EFG    J            C    EF    -    J
 
     */
-    void split_kid(Node* kid, bool left_heavy=false) {
+    void split_kid(Node *kid, bool left_heavy = false) {
       assert(N < 3); // must accomodate new KV from split
 
-      Node* LL = kid;
-      Node* RR = new Node;
-      assert(LL->N == 3);    // LL must be full!
-      int LLN = 1, RRN = 1;  // final #tup of LL/RR
+      Node *LL = kid;
+      Node *RR = new Node;
+      assert(LL->N == 3);   // LL must be full!
+      int LLN = 1, RRN = 1; // final #tup of LL/RR
       if (left_heavy) {
-	LLN++, RRN--;
+        LLN++, RRN--;
       }
 
       // move last KV from LL to RR
       RR->N = RRN;
       if (RRN) {
-	RR->tup[0] = LL->tup[2];
+        RR->tup[0] = LL->tup[2];
       }
       RR->ptrx = LL->ptrx;
 
@@ -175,24 +176,28 @@ private:
 
    */
 
-  static void _check(Node *node, const K* minkey, const K* maxkey, int depth, int &expected_depth) {
+  static void _check(Node *node, const K *minkey, const K *maxkey, int depth,
+                     int &expected_depth) {
     node->_check(minkey, maxkey);
     int N = node->N;
-    
+
     // internal node
     if (node->ptrx) {
       // check kids
       if (N) {
-	// check leftmost kid
-        _check(node->tup[0].ptr, minkey, &node->tup[0].key, depth + 1, expected_depth);
+        // check leftmost kid
+        _check(node->tup[0].ptr, minkey, &node->tup[0].key, depth + 1,
+               expected_depth);
 
-	//  check middle kids
-	for (int i = 1; i < N; i++) {
-	  _check(node->tup[i].ptr, &node->tup[i-1].key, &node->tup[i].key, depth + 1, expected_depth);
-	}
+        //  check middle kids
+        for (int i = 1; i < N; i++) {
+          _check(node->tup[i].ptr, &node->tup[i - 1].key, &node->tup[i].key,
+                 depth + 1, expected_depth);
+        }
       }
 
-      _check(node->ptrx, N ? &node->tup[N-1].key : nullptr, maxkey, depth + 1, expected_depth);
+      _check(node->ptrx, N ? &node->tup[N - 1].key : nullptr, maxkey, depth + 1,
+             expected_depth);
       return;
     }
 
@@ -203,40 +208,39 @@ private:
     assert(depth == expected_depth);
   }
 
-
-  bool last_on_level(Node* const n) const {
-    Node* p = _root;
+  bool last_on_level(Node *const n) const {
+    Node *p = _root;
     while (p) {
       if (n == p) {
-	return true;
+        return true;
       }
       p = p->ptrx;
     }
     return false;
   }
 
-  std::vector<Node*> breadth_first_list() const {
-    std::vector<Node*> ret;
-    std::queue<Node*> q;
+  std::vector<Node *> breadth_first_list() const {
+    std::vector<Node *> ret;
+    std::queue<Node *> q;
     if (_root) {
       q.push(_root);
     }
     while (!q.empty()) {
-      Node* n = q.front();
+      Node *n = q.front();
       q.pop();
 
       // add to ret[]
       ret.push_back(n);
       if (last_on_level(n)) {
-	ret.push_back(nullptr);
+        ret.push_back(nullptr);
       }
 
       // add kids to queue
       if (n->ptrx) {
-	for (int i = 0; i < n->N; i++) {
-	  q.push(n->tup[i].ptr);
-	}
-	q.push(n->ptrx);
+        for (int i = 0; i < n->N; i++) {
+          q.push(n->tup[i].ptr);
+        }
+        q.push(n->ptrx);
       }
     }
     return ret;
@@ -268,7 +272,7 @@ public:
         j = 0;
       }
       // split the kid at path[j]
-      path[j]->split_kid(path[j+1], leftheavy);
+      path[j]->split_kid(path[j + 1], leftheavy);
       check();
 
       // re-descend
@@ -289,15 +293,15 @@ public:
 #endif
   }
 
-
   std::string to_string() const {
     std::ostringstream oss;
-    // Get a breadth-first list of nodes. Each level is separated by a NULL node.
+    // Get a breadth-first list of nodes. Each level is separated by a NULL
+    // node.
     auto list = breadth_first_list();
     for (auto n : list) {
       if (!n) {
-	oss << "\n";
-	continue;
+        oss << "\n";
+        continue;
       }
       oss << n->to_string() << " ";
     }
