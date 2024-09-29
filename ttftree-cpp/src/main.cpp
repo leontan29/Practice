@@ -1,7 +1,6 @@
 #include "ttftree.h"
 #include <iostream>
 
-
 using std::cout;
 using std::endl;
 
@@ -35,8 +34,8 @@ void Tests::test1() {
 
 
    */
-  for (int i = 5; i <= 65; i+= 5) {
-    t.put(i, i+1);
+  for (int i = 5; i <= 65; i += 5) {
+    t.put(i, i + 1);
   }
   t.check();
 }
@@ -46,9 +45,7 @@ void Tests::test3() {}
 void Tests::test4() {}
 void Tests::test5() {}
 
-  
-int main()
-{
+int main() {
   try {
     Tests::test1();
     Tests::test2();
