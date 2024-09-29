@@ -27,7 +27,7 @@ private:
       delete ptrx;
     }
 
-    void _check() {
+    void _check(const K* minkey, const K* maxkey) {
       // keys are in order in this node
       assert(0 <= N && N <= 3);
       for (int i = 1; i < N; i++) {
@@ -38,6 +38,13 @@ private:
         for (int i = 0; i < N; i++) {
           assert(tup[i].ptr);
         }
+      }
+
+      if (minkey && N) {
+	assert(*minkey < tup[0].key);
+      }
+      if (maxkey && N) {
+	assert(tup[N-1].key < *maxkey);
       }
     }
 
@@ -74,7 +81,7 @@ private:
       assert(N < 3);
       assert(0 <= idx && idx <= N);
       // shift right to make space
-      memmove(&tup[idx + 1], &tup[idx], N - idx);
+      memmove(&tup[idx + 1], &tup[idx], sizeof(tup[0]) * (N - idx));
       /*
       for (int i = N; i > idx; i--) {
         tup[i] = tup[i-1];
@@ -121,7 +128,7 @@ private:
       // move LL's KV[1 or 2] to parent (me).
       int idx = lookup(LL->tup[LLN].key);
       insert(idx, LL, LL->tup[LLN].key, LL->tup[LLN].value, RR);
-      _check();
+      _check(nullptr, nullptr);
 
       // Fix LL
       LL->ptrx = LL->tup[LLN].ptr;
@@ -168,40 +175,32 @@ private:
 
    */
 
-  static void _check(Node *node, int depth, int &expected_depth, K &minkey,
-                     K &maxkey) {
-    node->_check();
-
+  static void _check(Node *node, const K* minkey, const K* maxkey, int depth, int &expected_depth) {
+    node->_check(minkey, maxkey);
+    int N = node->N;
+    
+    // internal node
     if (node->ptrx) {
-      K childmin, childmax;
-      // check leftmost kid
-      if (node->N) {
-        _check(node->tup[0].ptr, depth + 1, expected_depth, childmin, childmax);
-        assert(childmax < node->tup[0].key);
+      // check kids
+      if (N) {
+	// check leftmost kid
+        _check(node->tup[0].ptr, minkey, &node->tup[0].key, depth + 1, expected_depth);
+
+	//  check middle kids
+	for (int i = 1; i < N; i++) {
+	  _check(node->tup[i].ptr, &node->tup[i-1].key, &node->tup[i].key, depth + 1, expected_depth);
+	}
       }
 
-      //  check middle kids
-      for (int i = 1; i < node->N; i++) {
-        _check(node->tup[i].ptr, depth + 1, expected_depth, childmin, childmax);
-        assert(node->tup[i - 1].key < childmin);
-        assert(childmax < node->tup[i].key);
-      }
-
-      _check(node->ptrx, depth + 1, expected_depth, childmin, childmax);
-      assert(node->tup[node->N - 1].key < childmin);
-
-      minkey = childmin;
-      maxkey = childmax;
+      _check(node->ptrx, N ? &node->tup[N-1].key : nullptr, maxkey, depth + 1, expected_depth);
       return;
     }
 
+    // leaf node
     if (expected_depth == -1) {
       expected_depth = depth;
     }
     assert(depth == expected_depth);
-
-    minkey = node->tup[0].key;
-    maxkey = node->tup[node->N - 1].key;
   }
 
 
@@ -244,7 +243,7 @@ private:
   }
 
 public:
-  void put(const K &key, const V &value) {
+  void put(const K &key, const V &value, bool leftheavy = false) {
     check();
   again:
     auto path = descend(key);
@@ -269,7 +268,7 @@ public:
         j = 0;
       }
       // split the kid at path[j]
-      path[j]->split_kid(path[j+1]);
+      path[j]->split_kid(path[j+1], leftheavy);
       check();
 
       // re-descend
@@ -286,8 +285,7 @@ public:
   void check() {
 #ifndef NDEBUG
     int expected_depth = -1;
-    K minkey, maxkey;
-    _check(_root, 0, expected_depth, minkey, maxkey);
+    _check(_root, nullptr, nullptr, 0, expected_depth);
 #endif
   }
 
@@ -303,7 +301,6 @@ public:
       }
       oss << n->to_string() << " ";
     }
-    oss << "\n";
     return oss.str();
   }
 

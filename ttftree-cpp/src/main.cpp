@@ -22,7 +22,7 @@ public:
 };
 
 void Tests::test1() {
-  cout << "Test 1: Constructor" << endl;
+  cout << "Test 1: simple" << endl;
   TTFTree<int, int> t;
   t.check();
   cout << t.to_string() << endl;
@@ -50,8 +50,52 @@ void Tests::test1() {
   cout << t.to_string() << endl;
 }
 
-void Tests::test2() {}
-void Tests::test3() {}
+void Tests::test2() {
+  cout << "Test 2: simple, leftheavy" << endl;
+  TTFTree<int, int> t;
+  /*
+             [20,     40]
+         /         |        \
+      [10]        [30]        [50, 60]
+     /   \       /   \       /   |   \
+   [5]  [15]   [25]  [35]  [45] [55] [65]
+
+
+   */
+  printf("inserting 5, 10, 15, 20, 25 30 35 40 45 50 55 60 65\n");
+  for (int i = 5; i <= 65; i += 5) {
+    t.put(i, -i, true);
+  }
+  t.check();
+  cout << t.to_string() << endl;
+}
+
+
+void Tests::test3() {
+  cout << "Test : insert on 3-level tree" << endl;
+  TTFTree<int, int> t;
+  cout << "... insert [550 .. 650] step 50\n";
+  for (int i = 50; i <= 650; i += 50) {
+    t.put(i, -i, true);
+  }
+  t.check();
+  cout << t.to_string() << endl;
+
+  cout << "... insert [0..49]\n";
+  for (int i = 0; i <= 49; i++) {
+    t.put(i, -i);
+    cout << t.to_string() << endl;
+  }
+  t.check();
+
+  cout << "... insert [651..700]\n";
+  for (int i = 651; i <= 700; i++) {
+    t.put(i, -i);
+  }
+  t.check();
+  
+  
+}
 void Tests::test4() {}
 void Tests::test5() {}
 
