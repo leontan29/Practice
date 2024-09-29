@@ -8,7 +8,7 @@ all: $(EXEC)
 main: main.cpp
 
 clean:
-	rm -f *.o $(EXEC)
+	rm -f *.o $(EXEC) *.d
 
 format:
 	clang-format -i *.h *.cpp

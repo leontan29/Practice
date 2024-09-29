@@ -3,9 +3,9 @@
 #include <string>
 #include <vector>
 #include <exception>
-#include <casssert>
+#include <cassert>
 
-// A circular queue backed by vector.
+
 template <typename K, typename V>
 class TTFTree {
 private:
@@ -59,11 +59,11 @@ private:
     }
 
     // As the parent node, split the child node at idx
-    //
-    //                  . D . H .                . D . F . H .
-    //  split at 1:    /    |    \     ==>      /   /    \    \
-    //                A    EFG    J            C    E     G    J
-    //
+    /*
+                      . D . H .                . D . F . H .
+      split at 1:    /    |    \     ==>      /   /    \    \
+                    A    EFG    J            C    E     G    J
+    */
     void split_kid(int idx) {
       assert(N < 3);	// must accomodate new KV from split
       assert(0 <= idx && idx <= N);
@@ -133,7 +133,7 @@ private:
   static void _check(Node* node, int depth, int& expected_depth, K& minkey, K& maxkey) {
     node->_check();
 
-    if (_node->ptrx) {
+    if (node->ptrx) {
       K childmin, childmax;
       // check leftmost kid
       if (node->N) {
@@ -167,7 +167,10 @@ private:
 
 public:
 
-  void put(const K& key, const T& value) {
+  void put(const K& key, const V& value) {
+#ifndef NDEBUG
+    check();
+#endif    
   again:
     auto path = descend(key);
     int sz = path.size();
@@ -200,13 +203,13 @@ public:
   }
 
   
-  bool get(const K& key, T& value);
+  bool get(const K& key, V& value);
   void del(const K& key);
 
   void check() {
     int expected_depth = -1;
     K minkey, maxkey;
-    _root->check(_root, 0, expected_depth, minkey, maxkey);
+    _check(_root, 0, expected_depth, minkey, maxkey);
   }
   
 
